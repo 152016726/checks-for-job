@@ -1,0 +1,47 @@
+1.先决条件：拥有gulpfile.js;
+npm init 初始化
+
+2.一共需要三个文件：gulp-connect/gulp-livereload/gulp-watch
+
+3.如无法安装则需要用已经放好的package.json和node_modules文件夹，然后在npm中直接gulp即可；
+
+4.gulpfile.js中定义步骤：
+1.引用各插件；e.g var livereload = require('gulp-livereload');
+
+2.定义livereload任务：
+gulp.task('webserver', function() {
+        connect.server({
+            //自动刷新
+            livereload: true,
+            //开放端口
+            port: 904,
+        });
+    })
+
+3.全局监视：
+gulp.task('watch', function() {
+    livereload.listen();
+    gulp.watch('index.html');
+    gulp.watch('2.html');
+})
+
+4.执行所需要执行的任务在每个任务前要加上监视和更新：
+gulp.task('htmlmin', function() {
+    gulp.src(['./*.html'])
+        //必须首先watch
+        .pipe(watch('./*.html'))
+
+        .pipe(htmlmin({
+            collapseWhitespace: true, // 去掉空白字符
+            minifyJS: true, //压缩页面JS
+            minifyCSS: true, //压缩页面CSS
+            removeComments: true //清除HTML注释
+        }))
+        .pipe(gulp.dest('./lib'))
+
+        //然后再刷新页面
+        .pipe(livereload());
+});
+
+5.设定默认任务
+gulp.task('default', ['htmlmin', 'webserver']);
